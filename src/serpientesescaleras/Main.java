@@ -1,7 +1,6 @@
 package serpientesescaleras;
 
 import java.util.Random;
-import java.util.Vector;
 
 /**
  *
@@ -116,17 +115,6 @@ public class Main {
     // Método imprimir tablero para tests
     public static void imprimirTablero(ListaDBL<Casilla> T) {
         NodoDBL<Casilla> aux = T.getFrente();
-//<editor-fold defaultstate="collapsed" desc="Primera forma de imprimirlo">
-//        while (aux != null) {
-//            System.out.println(
-//                    "noCasilla: " + aux.Info.noCasilla
-//                    + "\ttipoCasilla: " + aux.Info.tipoCasilla
-//                    + "\tposiciones: " + aux.Info.posiciones);
-//            aux = aux.getSig();
-//        }
-//</editor-fold>
-
-        // Segunda forma de imprimir
         for (int i = 0; aux != null && i < 10; i++) {
             for (int j = 0; j < 10; System.out.print(aux.Info.noCasilla + " " + aux.Info.tipoCasilla + " " + aux.Info.posiciones + "\t"), aux = aux.getSig(), j++);
             System.out.println("");
