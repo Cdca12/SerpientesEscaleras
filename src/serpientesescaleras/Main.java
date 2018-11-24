@@ -88,7 +88,7 @@ public class Main {
     public static void simularJuego(ListaDBL<Casilla> tablero, NodoDBL<Casilla>[] jugadores) {
         int dados, turno = 0;
         boolean juegoCompletado = false;
-        NodoDBL<Casilla> aux;
+        NodoDBL<Casilla> posicionActual;
         while (!juegoCompletado) {
             for (int i = 0; i < jugadores.length; i++) {
                 turno++;
@@ -122,24 +122,22 @@ public class Main {
                     jugadores[i] = jugadores[i].getSig();
                 }
 
-                aux = jugadores[i]; // Guardar donde cayó inicialmente
+                posicionActual = jugadores[i]; // Guardar donde cayó inicialmente
 
-                // Dependiento en qué tipo de casilla cayó, moverlo.
+                // Dependiento en qué tipo de casilla cayó, moverlo o no. Imprimir.
                 if (jugadores[i].Info.tipoCasilla == 'N') {
                     System.out.println("Casilla final: " + jugadores[i].Info.noCasilla
                             + "\nTipo de nodo: N");
                 } else if (jugadores[i].Info.tipoCasilla == 'E') {
-                    for (int j = 0; j < jugadores[i].Info.posiciones; aux = aux.getSig(), j++);
-                    System.out.println("Casilla final: " + aux.Info.noCasilla
+                    for (int j = 0; j < posicionActual.Info.posiciones; jugadores[i] = jugadores[i].getSig(), j++);
+                    System.out.println("Casilla final: " + jugadores[i].Info.noCasilla
                             + "\nTipo de nodo: E"
-                            + "\nEscaleras - Avanzaste " + jugadores[i].Info.posiciones + " posiciones");
-                    jugadores[i] = aux;
+                            + "\nEscaleras - Avanzaste " + posicionActual.Info.posiciones + " posiciones");
                 } else if (jugadores[i].Info.tipoCasilla == 'S') {
-                    for (int j = 0; j < jugadores[i].Info.posiciones; aux = aux.getAnt(), j++);
-                    System.out.println("Casilla final: " + aux.Info.noCasilla
+                    for (int j = 0; j < posicionActual.Info.posiciones; jugadores[i] = jugadores[i].getAnt(), j++);
+                    System.out.println("Casilla final: " + jugadores[i].Info.noCasilla
                             + "\nTipo de nodo: S"
-                            + "\nSerpientes - Retrocediste " + jugadores[i].Info.posiciones + " posiciones");
-                    jugadores[i] = aux;
+                            + "\nSerpientes - Retrocediste " + posicionActual.Info.posiciones + " posiciones");
                 }
                 System.out.println("----------------------------------\n");
 
@@ -155,5 +153,5 @@ public class Main {
             }
         }
     }
-    
+
 }
