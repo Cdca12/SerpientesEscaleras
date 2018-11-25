@@ -11,20 +11,13 @@ public class Main {
     public static void main(String[] args) {
         // Crear tablero original
         ListaDBL<Casilla> tablero = new ListaDBL<>();
-
-        for (int i = 0; i < 100;) {
-            tablero.InsertaFin(new Casilla(++i, 'N', 0));
-        }
+        for (int i = 0; i < 100; tablero.InsertaFin(new Casilla(++i, 'N', 0)));
 
         // Crear 5 escaleras
-        for (int i = 0; i < 5; i++) {
-            generarCasilla(tablero, 'E', 15, 70);
-        }
+        for (int i = 0; i < 5; generarCasilla(tablero, 'E', 15, 70), i++);
 
         // Crear 5 serpientes
-        for (int i = 0; i < 5; i++) {
-            generarCasilla(tablero, 'S', 30, 95);
-        }
+        for (int i = 0; i < 5; generarCasilla(tablero, 'S', 30, 95), i++);
 
         // Imprimir tablero
         System.out.println("\t\t\t\t  TABLERO"
@@ -52,8 +45,8 @@ public class Main {
     public static void generarCasilla(ListaDBL<Casilla> tablero, char tipoCasilla, int limiteInferior, int limiteSuperior) {
         int nodoValido = new Random().nextInt(limiteSuperior - limiteInferior + 1) + limiteInferior;
         NodoDBL<Casilla> aux = tablero.getFrente();
-
-        for (int i = 0; i < nodoValido; aux = aux.getSig(), i++); // Me posiciono
+        
+        for (int i = 0; i < nodoValido - 1; aux = aux.getSig(), i++); // Me posiciono. Condición -1 porque el getFrente "avanza 1 posición".
         while (aux.Info.tipoCasilla != 'N') {
             nodoValido = new Random().nextInt(limiteSuperior - limiteInferior + 1) + limiteInferior;
             aux = tablero.getFrente();
@@ -63,6 +56,7 @@ public class Main {
 
         int posicionesPorAvanzar = new Random().nextInt(20 - 5 + 1) + 5;
         NodoDBL<Casilla> auxTermina = aux;
+        
         // Con esto hago el mismo método funcionable para generar ya sea Escaleras o Serpientes
         if (tipoCasilla == 'E') {
             for (int i = 0; i < posicionesPorAvanzar; auxTermina = auxTermina.getSig(), i++);
@@ -88,30 +82,24 @@ public class Main {
     public static void simularJuego(ListaDBL<Casilla> tablero, NodoDBL<Casilla>[] jugadores) {
         int dados, turno = 0;
         boolean juegoCompletado = false;
-        NodoDBL<Casilla> posicionActual;
+        NodoDBL<Casilla> posicionActual = null;
+        NodoDBL<Casilla> casillaLlegada = null;
+
         while (!juegoCompletado) {
             for (int i = 0; i < jugadores.length; i++) {
                 turno++;
                 dados = new Random().nextInt(12 - 2 + 1) + 2;
 
-                System.out.println("----------------------------------"
-                        + "\nTurno " + turno + ""
-                        + "\nJugador: " + (i + 1)
-                        + "\nDados: " + dados);
+                posicionActual = jugadores[i]; // Guardar posicion actual antes de moverse
 
                 // Primer tiro de ese jugador
-                if (jugadores[i] == null) {
+                if (posicionActual == null) {
                     jugadores[i] = tablero.getFrente();
                     for (int j = 0; j < dados - 1; jugadores[i] = jugadores[i].getSig(), j++);
-                    System.out.println(
-                            "Casilla inicio: Primera jugada"
-                            + "\nCasilla final: " + jugadores[i].Info.noCasilla
-                            + "\nTipo de nodo: N"
-                            + "\n----------------------------------\n");
+                    imprimirCasilla(jugadores, posicionActual, casillaLlegada, turno, dados, i); // Método void
+
                     continue;
                 }
-
-                System.out.println("Casilla inicio: " + jugadores[i].Info.noCasilla);
 
                 // Me posiciono donde va a llegar el jugador
                 for (int j = 0; j < dados; j++) {
@@ -122,23 +110,17 @@ public class Main {
                     jugadores[i] = jugadores[i].getSig();
                 }
 
-                posicionActual = jugadores[i]; // Guardar donde cayó inicialmente
+                casillaLlegada = jugadores[i]; // Guardar donde llegó inicialmente, antes de aplicar avance o retroceso
 
-                // Dependiento en qué tipo de casilla cayó, moverlo o no. Imprimir.
-                if (jugadores[i].Info.tipoCasilla == 'N') {
-                    System.out.println("Casilla final: " + jugadores[i].Info.noCasilla
-                            + "\nTipo de nodo: N");
-                } else if (jugadores[i].Info.tipoCasilla == 'E') {
-                    for (int j = 0; j < posicionActual.Info.posiciones; jugadores[i] = jugadores[i].getSig(), j++);
-                    System.out.println("Casilla final: " + jugadores[i].Info.noCasilla
-                            + "\nTipo de nodo: E"
-                            + "\nEscaleras - Avanzaste " + posicionActual.Info.posiciones + " posiciones");
-                } else if (jugadores[i].Info.tipoCasilla == 'S') {
-                    for (int j = 0; j < posicionActual.Info.posiciones; jugadores[i] = jugadores[i].getAnt(), j++);
-                    System.out.println("Casilla final: " + jugadores[i].Info.noCasilla
-                            + "\nTipo de nodo: S"
-                            + "\nSerpientes - Retrocediste " + posicionActual.Info.posiciones + " posiciones");
+                // Dependiendo si cayó en escalera o serpiente, moverlo.
+                if (casillaLlegada.Info.tipoCasilla == 'E') {
+                    for (int j = 0; j < casillaLlegada.Info.posiciones; jugadores[i] = jugadores[i].getSig(), j++);
+                } else if (casillaLlegada.Info.tipoCasilla == 'S') {
+                    for (int j = 0; j < casillaLlegada.Info.posiciones; jugadores[i] = jugadores[i].getAnt(), j++);
                 }
+
+                // Imprimir casilla
+                imprimirCasilla(jugadores, posicionActual, casillaLlegada, turno, dados, i); // Método void
                 System.out.println("----------------------------------\n");
 
                 // Ganar el juego
@@ -151,6 +133,36 @@ public class Main {
                     break;
                 }
             }
+        }
+    }
+
+    public static void imprimirCasilla(NodoDBL<Casilla>[] jugadores, NodoDBL<Casilla> posicionActual, NodoDBL<Casilla> casillaLlegada, int turno, int dados, int iterador) {
+        System.out.println("----------------------------------"
+                + "\nTurno " + turno
+                + "\nJugador: " + (iterador + 1)
+                + "\nDados: " + dados);
+
+        // Sin valor de posicion actual, entonces es la primera jugada
+        if (posicionActual == null) {
+            System.out.println("Casilla inicio: Primera jugada"
+                    + "\nCasilla final: " + jugadores[iterador].Info.noCasilla
+                    + "\nTipo de nodo: N"
+                    + "\n----------------------------------\n");
+            return;
+        }
+
+        System.out.println("Casilla inicio: " + posicionActual.Info.noCasilla
+                + "\nCasilla final: " + jugadores[iterador].Info.noCasilla);
+//                + "\nTipo de nodo: " + casillaLlegada.Info.tipoCasilla); // No usar esto, porque si llego a una T, la imprime
+
+        if (casillaLlegada.Info.tipoCasilla == 'N') {
+            System.out.println("Tipo de nodo: N");
+        } else if (casillaLlegada.Info.tipoCasilla == 'E') {
+            System.out.println("Tipo de nodo: E"
+                    + "\nEscaleras - Avanzaste " + casillaLlegada.Info.posiciones + " posiciones");
+        } else if (casillaLlegada.Info.tipoCasilla == 'S') {
+            System.out.println("Tipo de nodo: E"
+                    + "\nSerpientes - Retrocediste " + casillaLlegada.Info.posiciones + " posiciones");
         }
     }
 
